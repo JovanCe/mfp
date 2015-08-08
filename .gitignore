@@ -1,0 +1,15 @@
+.idea
+.orig
+.DS_Store
+doc/_build
+atlassian-ide-plugin.xml
+*.pyc
+*.db
+*.orig
+*.iml
+log/*
+build/*
+out/*
+
+build/requests
+build/pip-delete-this-directory.txt
