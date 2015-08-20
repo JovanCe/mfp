@@ -13,3 +13,7 @@ out/*
 
 build/requests
 build/pip-delete-this-directory.txt
+
+*.o
+
+
