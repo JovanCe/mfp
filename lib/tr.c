@@ -12,6 +12,7 @@
 */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 
 int cap;
@@ -20,39 +21,7 @@ int num_nodes,num_arcs;
 int source,sink;
 int seed;
 
-int main(argc, argv)
-int argc;
-char *argv[];
-{
-
-  imax = atoi(argv[1]);
-  capacity = atoi(argv[2]);
-  seed = atoi(argv[3]);
-  srandom(seed);
-  UserValues();
-  TransitTwoNet();
-}
-
-Gen1()
-{
-  i = 1;
-  for (z = 2; z <= (colmax+1); z++)
-    {
-      DoArc(i, z);
-    }
-}
-
-Gen2()
-{
-  i = imax-colmax+2;
-  for (z = zmax+colmax+1;  z <= zmax+2*colmax; z++)
-    {
-      DoArc(i, imax+2);
-      i++;
-    }
-}
-
-DoArc(i1, k2)
+void DoArc(i1, k2)
 int i1, k2;
 {
   if (i1 > num_nodes || k2 > num_nodes)
@@ -66,7 +35,26 @@ int i1, k2;
   printf("a %d %d %d\n",k2,i1,cap);
 }
 
-GenArcs()
+void Gen1()
+{
+  i = 1;
+  for (z = 2; z <= (colmax+1); z++)
+    {
+      DoArc(i, z);
+    }
+}
+
+void Gen2()
+{
+  i = imax-colmax+2;
+  for (z = zmax+colmax+1;  z <= zmax+2*colmax; z++)
+    {
+      DoArc(i, imax+2);
+      i++;
+    }
+}
+
+void GenArcs()
 {
   int j;
 
@@ -94,14 +82,14 @@ GenArcs()
   while (i != imax+1);
 }
 
-TransitTwoNet()
+void TransitTwoNet()
 {
   Gen1();
   GenArcs();
   Gen2();
 }
 
-UserValues()
+void UserValues()
 {
   colmax = (int) (sqrt((double)imax) + 0.5);
   zmax = 2*(imax-colmax);
@@ -125,3 +113,17 @@ int high;
 {
     return (random() % high) + 1;
 }
+
+int main(argc, argv)
+int argc;
+char *argv[];
+{
+
+  imax = atoi(argv[1]);
+  capacity = atoi(argv[2]);
+  seed = atoi(argv[3]);
+  srandom(seed);
+  UserValues();
+  TransitTwoNet();
+}
+
