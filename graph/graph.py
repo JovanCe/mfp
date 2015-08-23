@@ -33,15 +33,16 @@ class DIMACSGraphFactory(object):
 
         with open(path_to_dimacs_file, 'r') as f:
             # problem descriptor
-            (p, nodes, arcs) = f.readline().split(' ')
+            (nodes, arcs) = f.readline().split(' ')[2:]
             g.total_nodes = int(nodes)
             g.total_arcs = int(arcs)
             # node descriptors
-            (desc, n, t) = f.readline().split(' ')
-            g.source = n
-            (desc, n, t) = f.readline().split(' ')
-            g.sink = n
+            (n, t) = f.readline().split(' ')[1:]
+            g.source = int(n)
+            (n, t) = f.readline().split(' ')[1:]
+            g.sink = int(n)
             # arc descriptors
-            for line in f.readline():
-                (a, n1, n2, c) = line.split(' ')
-                g.nodes[(n1, n2)] = c
+            for line in f:
+                (n1, n2, c) = line.split(' ')[1:]
+                g.nodes[(int(n1), int(n2))] = int(c.strip())
+        return g
