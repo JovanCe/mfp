@@ -25,4 +25,6 @@ def bfs(graph, node):
             parents[n] = u
             queue.put(n)
 
+    return distances
+
 
