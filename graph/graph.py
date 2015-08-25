@@ -5,12 +5,14 @@ __copyright__ = 'Copyright (c) 2015 Seven Bridges Genomics'
 import itertools
 
 
-class Graph(object):
+class FlowNetwork(object):
     def __init__(self):
         self.nodes = {}
+        self.flows = {}
 
     def add_arc(self, n1, n2, c):
         self.nodes[(n1, n2)] = c
+        self.flows[(n1, n2)] = 0
 
     def get_nodes(self):
         return set(itertools.chain.from_iterable(self.nodes.keys()))
@@ -29,7 +31,7 @@ class Graph(object):
 class DIMACSGraphFactory(object):
     @classmethod
     def create(cls, path_to_dimacs_file):
-        g = Graph()
+        g = FlowNetwork()
 
         with open(path_to_dimacs_file, 'r') as f:
             # problem descriptor
@@ -44,5 +46,5 @@ class DIMACSGraphFactory(object):
             # arc descriptors
             for line in f:
                 (n1, n2, c) = line.split(' ')[1:]
-                g.nodes[(int(n1), int(n2))] = int(c.strip())
+                g.add_arc(int(n1), int(n2), int(c.strip()))
         return g
