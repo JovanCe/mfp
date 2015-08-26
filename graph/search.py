@@ -17,14 +17,19 @@ def bfs(graph, node):
         parents[n] = -1
 
     distances[node] = 0
+    queue.put(node)
     while not queue.empty():
         u = queue.get()
-        for n in graph.get_neighbours(u):
+        for n in graph.get_node_neighbours(u):
             if distances[n] == -1:
                 distances[n] = distances[u] + 1
-            parents[n] = u
-            queue.put(n)
+                parents[n] = u
+                queue.put(n)
 
     return distances
+
+
+def dfs(graph, node):
+    pass
 
 
