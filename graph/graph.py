@@ -11,6 +11,7 @@ class FlowNetwork(object):
         self.sink = sink
         self.nodes = {}
         self.flows = {}
+        self.total_nodes = self.total_arcs = 0
 
     def add_arc(self, n1, n2, c):
         self.nodes[(n1, n2)] = c
@@ -39,6 +40,12 @@ class FlowNetwork(object):
                 r.add_arc(n2, n1, flow)
             r.add_arc(n1, n2, c-flow)
         return r
+
+    @property
+    def density(self):
+        if self.total_nodes == 0:
+            return 0
+        return float(self.total_arcs) / self.total_nodes
 
 
 class DIMACSGraphFactory(object):
