@@ -13,12 +13,12 @@ def ford_fulkerson(flow_network):
     path = get_path(residual)
     while len(path):
         path_arcs = [(path[i], path[i+1]) for i in range(len(path)-1)]
-        min_flow = residual.get_arc_capacity(*min(path_arcs, key=lambda arc: residual.get_arc_capacity(*arc)))
+        min_capacity = residual.get_arc_capacity(*min(path_arcs, key=lambda arc: residual.get_arc_capacity(*arc)))
         for (n1, n2) in path_arcs:
             try:
-                flow_network.increase_flow(n1, n2, min_flow)
+                flow_network.increase_flow(n1, n2, min_capacity)
             except ValueError:
-                flow_network.decrease_flow(n1, n2, min_flow)
+                flow_network.decrease_flow(n1, n2, min_capacity)
         residual = flow_network.get_residual_network()
         path = get_path(residual)
 
