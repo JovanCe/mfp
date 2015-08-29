@@ -11,16 +11,17 @@ def dijkstra(graph, source, target):
     :param target:
     :return:
     """
-    dist = {source: 0}
-    prev = {source: -1}
+    dist = {}
+    prev = {}
     nodes = graph.get_nodes()
     q = []
 
     for node in nodes:
-        if node != source:
-            dist[node] = float('inf')
-            prev[node] = -1
+        dist[node] = float('inf')
+        prev[node] = -1
         q.append(node)
+
+    dist[source] = 0
 
     while len(q):
         q.sort(key=lambda x: dist[x], reverse=True)
@@ -30,6 +31,9 @@ def dijkstra(graph, source, target):
             while prev[node] != -1:
                 path.insert(0, node)
                 node = prev[node]
+            # check if a path exists and add the source node for complete path
+            if len(path):
+                path.insert(0, node)
             return path
 
         for neighbour in graph.get_node_neighbours(node):
