@@ -72,13 +72,12 @@ class FlowNetwork(object):
 
     def get_residual_network(self):
         r = FlowNetwork(self.source, self.sink)
-        r.source = self.source
-        r.sink = self.sink
         for (n1, n2), c in self.nodes.items():
             flow = self.flows[(n1, n2)]
             if flow > 0:
                 r.add_arc(n2, n1, flow)
-            r.add_arc(n1, n2, c-flow)
+            if c-flow > 0:
+                r.add_arc(n1, n2, c-flow)
         return r
 
     def reset_flows(self):
