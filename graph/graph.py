@@ -100,18 +100,18 @@ class DIMACSGraphFactory(object):
             total_nodes = int(nodes)
             total_arcs = int(arcs)
             # node descriptors
-            n = int(f.readline().split(' ')[1:][0])
-            m = int(f.readline().split(' ')[1:][0])
-            g = FlowNetwork(n, m)
+            s = int(f.readline().split(' ')[1:][0])
+            t = int(f.readline().split(' ')[1:][0])
+            g = FlowNetwork(s, t)
             g.total_nodes = total_nodes
 
             # arc descriptors
             for line in f:
-                (n1, n2, c) = line.split(' ')[1:]
+                (n1, n2, c) = [int(i) for i in line.split(' ')[1:]]
                 # ignore incoming edges to source and outgoing from sink
-                if n1 == m or n2 == n:
+                if n1 == t or n2 == s:
                     total_arcs -= 1
                     continue
-                g.add_arc(int(n1), int(n2), int(c.strip()))
+                g.add_arc(n1, n2, c)
             g.total_arcs = total_arcs
         return g
