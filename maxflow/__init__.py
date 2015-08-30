@@ -3,3 +3,4 @@ __date__ = '20 August 2015'
 __copyright__ = 'Copyright (c) 2015 Seven Bridges Genomics'
 
 from ford_fulkerson import ford_fulkerson
+from edmonds_karp import edmonds_karp

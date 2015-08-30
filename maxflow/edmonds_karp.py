@@ -2,13 +2,13 @@ __author__ = 'Jovan Cejovic <jovan.cejovic@sbgenomics.com>'
 __date__ = '27 August 2015'
 __copyright__ = 'Copyright (c) 2015 Seven Bridges Genomics'
 
-from graph.shortest_path import dijkstra
+from graph.search import bfs
 
 
-def ford_fulkerson(flow_network):
+def edmonds_karp(flow_network):
     flow_network.reset_flows()
 
-    get_path = lambda r: dijkstra(r, flow_network.source, flow_network.sink)
+    get_path = lambda r: bfs(r, flow_network.source, flow_network.sink)
     residual = flow_network.get_residual_network()
     path = get_path(residual)
     while len(path):
