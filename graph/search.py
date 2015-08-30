@@ -5,7 +5,14 @@ __copyright__ = 'Copyright (c) 2015 Seven Bridges Genomics'
 from Queue import Queue
 
 
-def bfs(graph, node):
+def bfs(graph, source, target):
+    """
+    Finds a path from source to target using breadth-first search
+    :param graph:
+    :param source:
+    :param target:
+    :return:
+    """
     nodes = graph.get_nodes()
     queue = Queue(len(nodes))
     distances = {}
@@ -16,17 +23,28 @@ def bfs(graph, node):
         # no parent
         parents[n] = -1
 
-    distances[node] = 0
-    queue.put(node)
+    distances[source] = 0
+    queue.put(source)
     while not queue.empty():
         u = queue.get()
+        if u == target:
+            path = []
+            while parents[u] != -1:
+                path.insert(0, u)
+                u = parents[u]
+            # check if a path exists and add the source node for complete path
+            if len(path):
+                path.insert(0, u)
+            return path
         for n in graph.get_node_neighbours(u):
             if distances[n] == -1:
                 distances[n] = distances[u] + 1
                 parents[n] = u
                 queue.put(n)
 
-    return distances
+    return []
+
+
 
 
 def dfs(graph, node):
