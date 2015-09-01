@@ -7,10 +7,10 @@ import itertools
 
 class FlowNetwork(object):
     def __init__(self, source, sink):
-        self.source = source
-        self.sink = sink
-        self.nodes = {}
-        self.flows = {}
+        self._source = source
+        self._sink = sink
+        self._nodes = {}
+        self._flows = {}
         self.total_nodes = self.total_arcs = 0
 
     def add_arc(self, n1, n2, c):
@@ -21,8 +21,8 @@ class FlowNetwork(object):
         :param c: capacity of the arc
         :return:
         """
-        self.nodes[(n1, n2)] = c
-        self.flows[(n1, n2)] = 0
+        self._nodes[(n1, n2)] = c
+        self._flows[(n1, n2)] = 0
 
     def set_flow(self, n1, n2, f):
         """
@@ -32,8 +32,8 @@ class FlowNetwork(object):
         :param f: flow value
         :return:
         """
-        if (n1, n2) in self.nodes:
-            self.flows[(n1, n2)] = f
+        if (n1, n2) in self._nodes:
+            self._flows[(n1, n2)] = f
         else:
             raise ValueError('Arc (%d, %d) doesn\'t exist', (n1, n2))
 
@@ -45,7 +45,7 @@ class FlowNetwork(object):
         :param f: value by which to increase
         :return:
         """
-        self.set_flow(n1, n2, self.flows[(n1, n2)] + f)
+        self.set_flow(n1, n2, self._flows[(n1, n2)] + f)
 
     def decrease_flow(self, n1, n2, f):
         """
@@ -55,25 +55,25 @@ class FlowNetwork(object):
         :param f: value by which to decrease
         :return:
         """
-        self.set_flow(n1, n2, self.flows[(n1, n2)] - f)
+        self.set_flow(n1, n2, self._flows[(n1, n2)] - f)
 
     def get_nodes(self):
-        return set(itertools.chain.from_iterable(self.nodes.keys()))
+        return set(itertools.chain.from_iterable(self._nodes.keys()))
 
     def get_arc_capacity(self, n1, n2):
-        return self.nodes[(n1, n2)]
+        return self._nodes[(n1, n2)]
 
     def get_node_neighbours(self, n):
         neighbours = []
-        for (n1, n2) in self.nodes.keys():
+        for (n1, n2) in self._nodes.keys():
             if n == n1:
                 neighbours.append(n2)
         return neighbours
 
     def get_residual_network(self):
-        r = FlowNetwork(self.source, self.sink)
-        for (n1, n2), c in self.nodes.items():
-            flow = self.flows[(n1, n2)]
+        r = FlowNetwork(self._source, self._sink)
+        for (n1, n2), c in self._nodes.items():
+            flow = self._flows[(n1, n2)]
             if flow > 0:
                 r.add_arc(n2, n1, flow)
             if c-flow > 0:
@@ -81,13 +81,29 @@ class FlowNetwork(object):
         return r
 
     def reset_flows(self):
-        self.flows = {k: 0 for k in self.nodes.keys()}
+        self._flows = {k: 0 for k in self._nodes.keys()}
 
     @property
     def density(self):
         if self.total_nodes == 0:
             return 0
         return float(self.total_arcs) / (self.total_nodes * (self.total_nodes - 1))
+
+    @property
+    def flows(self):
+        return self._flows
+
+    @property
+    def nodes(self):
+        return self._nodes
+
+    @property
+    def source(self):
+        return self._source
+
+    @property
+    def sink(self):
+        return self._sink
 
 
 class DIMACSGraphFactory(object):
