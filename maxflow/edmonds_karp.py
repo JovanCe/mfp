@@ -17,13 +17,10 @@ def edmonds_karp(flow_network):
         for (n1, n2) in path_arcs:
             try:
                 flow_network.increase_flow(n1, n2, min_capacity)
-            except ValueError:
-                flow_network.decrease_flow(n1, n2, min_capacity)
+            except KeyError:
+                flow_network.decrease_flow(n2, n1, min_capacity)
+
         residual = flow_network.get_residual_network()
         path = get_path(residual)
 
-    flows = {'flows': flow_network.flows,
-             'max_flow': sum([v for (k, v) in flow_network.flows.items() if flow_network.source == k[0]])
-             }
-
-    return flows
+    return flow_network.get_current_flows()

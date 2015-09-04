@@ -32,10 +32,7 @@ class FlowNetwork(object):
         :param f: flow value
         :return:
         """
-        if (n1, n2) in self._nodes:
-            self._flows[(n1, n2)] = f
-        else:
-            raise ValueError('Arc (%d, %d) doesn\'t exist', (n1, n2))
+        self._flows[(n1, n2)] = f
 
     def increase_flow(self, n1, n2, f):
         """
@@ -61,7 +58,10 @@ class FlowNetwork(object):
         return set(itertools.chain.from_iterable(self._nodes.keys()))
 
     def get_arc_capacity(self, n1, n2):
-        return self._nodes[(n1, n2)]
+        try:
+            return self._nodes[(n1, n2)]
+        except KeyError:
+            return 0
 
     def get_node_neighbours(self, n):
         neighbours = []
@@ -82,6 +82,12 @@ class FlowNetwork(object):
 
     def reset_flows(self):
         self._flows = {k: 0 for k in self._nodes.keys()}
+
+    def get_current_flows(self):
+        return {
+            'flows': self.flows,
+            'max_flow': sum([v for (k, v) in self.flows.items() if self.source == k[0]])
+            }
 
     @property
     def density(self):
