@@ -2,6 +2,8 @@ __author__ = 'Jovan Cejovic <jovan.cejovic@sbgenomics.com>'
 __date__ = '30 August 2015'
 __copyright__ = 'Copyright (c) 2015 Seven Bridges Genomics'
 
+from collections import defaultdict
+
 
 def _push(flow_network, n1, n2, excess, height):
     residual = flow_network.get_residual_network()
@@ -64,4 +66,48 @@ def generic_push_relabel(flow_network):
         node = _get_overflowing_node(flow_network, excess)
 
     return flow_network.get_current_flows()
+
+
+def _get_node_neighbour_lists(flow_network):
+    all_neighbours = defaultdict(set)
+    for n1, n2 in flow_network.nodes:
+        all_neighbours[n1].add(n2)
+        all_neighbours[n2].add(n1)
+
+    return {k: list(v) for k, v in all_neighbours.items()}
+
+
+def _discharge(flow_network, node, neighbour_list, excess, height):
+    i = 0
+    while excess[node] > 0:
+        try:
+            n = neighbour_list[i]
+            success = _push(flow_network, node, n, excess, height)
+            if not success:
+                i += 1
+        except IndexError:
+            _relabel(flow_network, node, height)
+            i = 0
+
+
+def relabel_to_front(flow_network):
+    excess, height = _init_preflow(flow_network)
+    all_neighbours = _get_node_neighbour_lists(flow_network)
+    node_list = list(flow_network.get_nodes() - {flow_network.source, flow_network.sink})
+    i = 0
+    while True:
+        try:
+            n = node_list[i]
+            old_height = height[n]
+            _discharge(flow_network, n, all_neighbours[n], excess, height)
+            if height[n] > old_height:
+                node_list.pop(i)
+                node_list.insert(0, n)
+                i = 0
+            i += 1
+        except IndexError:
+            break
+
+    return flow_network.get_current_flows()
+
 

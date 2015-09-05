@@ -17,8 +17,9 @@ if __name__ == '__main__':
         'pr': maxflow.generic_push_relabel
     }
 
-    graph = DIMACSGraphFactory.create(get_data_file('1.txt'))
+    graph = DIMACSGraphFactory.create(get_data_file('2.txt'))
     # flows = test_mapping[test](graph)
-    print 'pr ' + str(maxflow.generic_push_relabel(graph))
-    print 'ff ' + str(maxflow.ford_fulkerson(graph))
-    print 'ek ' + str(maxflow.edmonds_karp(graph))
+    print 'pr: ' + str(maxflow.generic_push_relabel(graph))
+    print 'rt: ' + str(maxflow.relabel_to_front(graph))
+    print 'ff: ' + str(maxflow.ford_fulkerson(graph))
+    print 'ek: ' + str(maxflow.edmonds_karp(graph))
