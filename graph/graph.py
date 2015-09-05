@@ -26,7 +26,7 @@ class FlowNetwork(object):
 
     def set_flow(self, n1, n2, f):
         """
-        Sets the flow for an arc denoted by starting and ending node
+        Sets the flow for an arc denoted by starting and ending nodes
         :param n1: starting arc node
         :param n2: ending arc node
         :param f: flow value
@@ -55,6 +55,10 @@ class FlowNetwork(object):
         self.set_flow(n1, n2, self._flows[(n1, n2)] - f)
 
     def get_nodes(self):
+        """
+        Return a set of all the nodes in the flow network
+        :return:
+        """
         return set(itertools.chain.from_iterable(self._nodes.keys()))
 
     def get_arc_capacity(self, n1, n2):
@@ -64,13 +68,23 @@ class FlowNetwork(object):
             return 0
 
     def get_node_neighbours(self, n):
+        """
+        Returns a list of adjacent nodes (respecting edge directions) for a given node
+        :param n: desired node
+        :return:
+        """
         neighbours = []
         for (n1, n2) in self._nodes.keys():
             if n == n1:
                 neighbours.append(n2)
+
         return neighbours
 
     def get_residual_network(self):
+        """
+        Constructs and returns a residual network corresponding to the current flows of the flow network
+        :return:
+        """
         r = FlowNetwork(self._source, self._sink)
         for (n1, n2), c in self._nodes.items():
             flow = self._flows[(n1, n2)]
@@ -113,6 +127,9 @@ class FlowNetwork(object):
 
 
 class DIMACSGraphFactory(object):
+    """
+    Constructs flow networks by parsing files with graph information in DIMACS format.
+    """
     @classmethod
     def create(cls, path_to_dimacs_file):
         with open(path_to_dimacs_file, 'r') as f:
