@@ -5,109 +5,116 @@ __copyright__ = 'Copyright (c) 2015 Seven Bridges Genomics'
 from collections import defaultdict
 
 
-def _push(flow_network, n1, n2, excess, height):
-    residual = flow_network.get_residual_network()
-    if residual.get_arc_capacity(n1, n2) <= 0 or height[n1] != height[n2] + 1:
-        return False
+class PushRelabel(object):
+    def __init__(self, flow_network):
+        self.flow_network = flow_network
+        self.height = {}
+        self.excess = {}
+        self._init_node_neighbour_lists()
 
-    delta_flow = min(excess[n1], residual.get_arc_capacity(n1, n2))
-    try:
-        flow_network.increase_flow(n1, n2, delta_flow)
-    except KeyError:
-        flow_network.decrease_flow(n2, n1, delta_flow)
-    excess[n1] -= delta_flow
-    excess[n2] += delta_flow
+    def _init_node_neighbour_lists(self):
+        all_neighbours = defaultdict(set)
+        for n1, n2 in self.flow_network.nodes:
+            all_neighbours[n1].add(n2)
+            all_neighbours[n2].add(n1)
 
-    return True
+        self.all_neighbours = {k: list(v) for k, v in all_neighbours.items()}
 
-
-def _relabel(flow_network, n, height):
-    residual = flow_network.get_residual_network()
-
-    for neighbour in residual.get_node_neighbours(n):
-        if height[n] > height[neighbour]:
+    def _push(self, n1, n2):
+        residual = self.flow_network.get_residual_network()
+        if residual.get_arc_capacity(n1, n2) <= 0 or self.height[n1] != self.height[n2] + 1:
             return False
 
-    height[n] = 1 + min([height[neighbour] for neighbour in residual.get_node_neighbours(n)])
+        delta_flow = min(self.excess[n1], residual.get_arc_capacity(n1, n2))
+        try:
+            self.flow_network.increase_flow(n1, n2, delta_flow)
+        except KeyError:
+            self.flow_network.decrease_flow(n2, n1, delta_flow)
+        self.excess[n1] -= delta_flow
+        self.excess[n2] += delta_flow
 
-    return True
+        return True
 
+    def _relabel(self, n):
+        residual = self.flow_network.get_residual_network()
+        for neighbour in residual.get_node_neighbours(n):
+            if self.height[n] > self.height[neighbour]:
+                return False
 
-def _init_preflow(flow_network):
-    excess = {k: 0 for k in flow_network.get_nodes()}
-    height = {k: 0 for k in flow_network.get_nodes()}
-    flow_network.reset_flows()
-    s = flow_network.source
-    height[s] = flow_network.total_nodes
-    for n in flow_network.get_node_neighbours(s):
-        c = flow_network.get_arc_capacity(s, n)
-        flow_network.set_flow(s, n, c)
-        excess[n] = c
-        excess[s] -= c
+        self.height[n] = 1 + min([self.height[neighbour] for neighbour in residual.get_node_neighbours(n)])
 
-    return excess, height
+        return True
 
+    def _init_preflow(self):
+        excess = {k: 0 for k in self.flow_network.get_nodes()}
+        height = {k: 0 for k in self.flow_network.get_nodes()}
+        self.flow_network.reset_flows()
+        s = self.flow_network.source
+        height[s] = self.flow_network.total_nodes
+        for n in self.flow_network.get_node_neighbours(s):
+            c = self.flow_network.get_arc_capacity(s, n)
+            self.flow_network.set_flow(s, n, c)
+            excess[n] = c
+            excess[s] -= c
 
-def _get_overflowing_node(flow_network, excess):
-    for n, f in excess.items():
-        if f > 0 and n != flow_network.source and n != flow_network.sink:
-            return n
+        self.excess = excess
+        self.height = height
+
+    def _get_overflowing_node(self):
+        for n, f in self.excess.items():
+            if f > 0 and n != self.flow_network.source and n != self.flow_network.sink:
+                return n
+
+    def generic_push_relabel(self):
+        self._init_preflow()
+
+        node = self._get_overflowing_node()
+        while node is not None:
+            res = any([self._push(node, neighbour) for neighbour in self.flow_network.get_residual_network().get_node_neighbours(node)])
+            if not res:
+                self._relabel(node)
+
+            node = self._get_overflowing_node()
+
+        return self.flow_network.get_current_flows()
+
+    def _discharge(self, n):
+        i = 0
+        neighbour_list = self.all_neighbours[n]
+        while self.excess[n] > 0:
+            try:
+                neighbour = neighbour_list[i]
+                success = self._push(n, neighbour)
+                if not success:
+                    i += 1
+            except IndexError:
+                self._relabel(n)
+                i = 0
+
+    def relabel_to_front(self):
+        self._init_preflow()
+
+        node_list = list(self.flow_network.get_nodes() - {self.flow_network.source, self.flow_network.sink})
+        i = 0
+        while True:
+            try:
+                n = node_list[i]
+                old_height = self.height[n]
+                self._discharge(n)
+                if self.height[n] > old_height:
+                    node_list.pop(i)
+                    node_list.insert(0, n)
+                    i = 0
+                i += 1
+            except IndexError:
+                break
+
+        return self.flow_network.get_current_flows()
 
 
 def generic_push_relabel(flow_network):
-    excess, height = _init_preflow(flow_network)
-
-    node = _get_overflowing_node(flow_network, excess)
-    while node is not None:
-        res = any([_push(flow_network, node, neighbour, excess, height) for neighbour in flow_network.get_residual_network().get_node_neighbours(node)])
-        if not res:
-            _relabel(flow_network, node, height)
-
-        node = _get_overflowing_node(flow_network, excess)
-
-    return flow_network.get_current_flows()
-
-
-def _get_node_neighbour_lists(flow_network):
-    all_neighbours = defaultdict(set)
-    for n1, n2 in flow_network.nodes:
-        all_neighbours[n1].add(n2)
-        all_neighbours[n2].add(n1)
-
-    return {k: list(v) for k, v in all_neighbours.items()}
-
-
-def _discharge(flow_network, node, neighbour_list, excess, height):
-    i = 0
-    while excess[node] > 0:
-        try:
-            n = neighbour_list[i]
-            success = _push(flow_network, node, n, excess, height)
-            if not success:
-                i += 1
-        except IndexError:
-            _relabel(flow_network, node, height)
-            i = 0
+    return PushRelabel(flow_network).generic_push_relabel()
 
 
 def relabel_to_front(flow_network):
-    excess, height = _init_preflow(flow_network)
-    all_neighbours = _get_node_neighbour_lists(flow_network)
-    node_list = list(flow_network.get_nodes() - {flow_network.source, flow_network.sink})
-    i = 0
-    while True:
-        try:
-            n = node_list[i]
-            old_height = height[n]
-            _discharge(flow_network, n, all_neighbours[n], excess, height)
-            if height[n] > old_height:
-                node_list.pop(i)
-                node_list.insert(0, n)
-                i = 0
-            i += 1
-        except IndexError:
-            break
-
-    return flow_network.get_current_flows()
-
-
+    return PushRelabel(flow_network).relabel_to_front()
