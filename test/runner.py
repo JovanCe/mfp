@@ -23,3 +23,4 @@ if __name__ == '__main__':
     print 'rt: ' + str(maxflow.relabel_to_front(graph))
     print 'ff: ' + str(maxflow.ford_fulkerson(graph))
     print 'ek: ' + str(maxflow.edmonds_karp(graph))
+    print 'cs: ' + str(maxflow.capacity_scaling(graph))
