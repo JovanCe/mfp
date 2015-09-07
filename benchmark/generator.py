@@ -38,7 +38,7 @@ def generate(density='sparse', problem_num=1):
     """
     seed = int(time.mktime(datetime.utcnow().timetuple()))
     random.seed(seed)
-    num_nodes = random.randint(20, 50)
+    num_nodes = random.randint(100, 500)
     num_arcs = _arcs_num_by_density(density, num_nodes)
     args = [seed, problem_num, num_nodes, 1, 1, num_arcs, 1, 1, 1, 0, 0, 0, 100, 10, 100]
 
@@ -61,11 +61,13 @@ def _arcs_num_by_density(density_level, num_nodes):
 
 def _save_to_file(netgen_output, problem_num):
     with open(util.get_data_file('%d.txt' % problem_num), 'w') as f:
+        nl = ''
         for line in netgen_output.split('\n'):
             if not line.replace('\n', '') or line.startswith('c'):
                 continue
-            f.write(line + '\n')
+            f.write('%s%s' % (nl, line))
+            nl = '\n'
 
 
 if __name__ == '__main__':
-    generate('sparse', 10)
+    generate('sparse', 3)
