@@ -17,5 +17,6 @@ build/pip-delete-this-directory.txt
 *.o
 *.gch
 lib/netgen/bin/*
+data/*
 
 
