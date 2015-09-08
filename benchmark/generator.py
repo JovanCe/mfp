@@ -37,30 +37,29 @@ def generate(density='sparse', problem_num=1):
     :return:
     """
     seed = int(time.mktime(datetime.utcnow().timetuple()))
-    random.seed(seed)
-    num_nodes = random.randint(100, 500)
+    num_nodes = random.randint(20, 100)
     num_arcs = _arcs_num_by_density(density, num_nodes)
     args = [seed, problem_num, num_nodes, 1, 1, num_arcs, 1, 1, 1, 0, 0, 0, 100, 10, 100]
 
     netgen_path = os.path.join(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')), 'lib', 'netgen', 'bin', 'netgen.out')
     netgen = Popen(netgen_path, stdin=PIPE, stdout=PIPE)
     out, err = netgen.communicate(" ".join([str(arg) for arg in args]))
-    _save_to_file(out, problem_num)
+    _save_to_file(out, problem_num, density)
 
 
 def _arcs_num_by_density(density_level, num_nodes):
     def get_arcs(density):
         return int(math.floor(density * num_nodes * (num_nodes - 1)))
     if density_level == 'sparse':
-        return get_arcs(random.uniform(0.00001, 0.3))
+        return get_arcs(random.uniform(0.1, 0.3))
     elif density_level == 'medium':
         return get_arcs(random.uniform(0.4, 0.6))
     elif density_level == 'dense':
         return get_arcs(random.uniform(0.7, 1.0))
 
 
-def _save_to_file(netgen_output, problem_num):
-    with open(util.get_data_file('%d.txt' % problem_num), 'w') as f:
+def _save_to_file(netgen_output, problem_num, density):
+    with open(util.get_data_file('%s_%d.txt' % (density, problem_num)), 'w') as f:
         nl = ''
         for line in netgen_output.split('\n'):
             if not line.replace('\n', '') or line.startswith('c'):
@@ -70,4 +69,11 @@ def _save_to_file(netgen_output, problem_num):
 
 
 if __name__ == '__main__':
-    generate('sparse', 3)
+    for i in range(200):
+        generate('sparse', i+1)
+
+    for i in range(200):
+        generate('medium', i+1)
+
+    for i in range(200):
+        generate('dense', i+1)
