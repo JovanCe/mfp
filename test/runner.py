@@ -6,6 +6,7 @@ import sys
 import maxflow
 from graph import DIMACSGraphFactory
 from test import get_data_file
+from run_benchmark import measure_execution_time
 
 if __name__ == '__main__':
     args = sys.argv
@@ -17,10 +18,18 @@ if __name__ == '__main__':
         'pr': maxflow.generic_push_relabel
     }
 
-    graph = DIMACSGraphFactory.create(get_data_file('2.txt'))
-    # flows = test_mapping[test](graph)
-    print 'pr: ' + str(maxflow.generic_push_relabel(graph))
-    print 'rt: ' + str(maxflow.relabel_to_front(graph))
-    print 'ff: ' + str(maxflow.ford_fulkerson(graph))
-    print 'ek: ' + str(maxflow.edmonds_karp(graph))
-    print 'cs: ' + str(maxflow.capacity_scaling(graph))
+    graphs = []
+    for i in range(5):
+        graphs.append(DIMACSGraphFactory.create(get_data_file('dense_200.txt')))
+
+    print 'pr: ' + str(maxflow.generic_push_relabel(graphs[0]))
+    print 'rt: ' + str(maxflow.relabel_to_front(graphs[1]))
+    print 'ff: ' + str(maxflow.ford_fulkerson(graphs[2]))
+    print 'ek: ' + str(maxflow.edmonds_karp(graphs[3]))
+    print 'cs: ' + str(maxflow.capacity_scaling(graphs[4]))
+    
+    print 'pr: ' + str(measure_execution_time(maxflow.generic_push_relabel, graphs[0]))
+    print 'rt: ' + str(measure_execution_time(maxflow.relabel_to_front, graphs[1]))
+    print 'ff: ' + str(measure_execution_time(maxflow.ford_fulkerson, graphs[2]))
+    print 'ek: ' + str(measure_execution_time(maxflow.edmonds_karp, graphs[3]))
+    print 'cs: ' + str(measure_execution_time(maxflow.capacity_scaling, graphs[4]))

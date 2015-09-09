@@ -8,7 +8,7 @@ import util
 from graph.graph import DIMACSGraphFactory
 
 
-def _measure_execution_time(func, *args):
+def measure_execution_time(func, *args):
     t1 = time.clock()
     func(*args)
     t2 = time.clock()
@@ -21,7 +21,7 @@ def _run_maxflow(maxflow_func, data_file):
 
 
 def _run_by_density(density, maxflow_func):
-    results = [_measure_execution_time(_run_maxflow, maxflow_func, '%s_%d.txt' % (density, i+1)) for i in range(200)]
+    results = [measure_execution_time(_run_maxflow, maxflow_func, '%s_%d.txt' % (density, i+1)) for i in range(200)]
     return results
 
 
