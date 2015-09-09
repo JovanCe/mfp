@@ -12,7 +12,7 @@ from subprocess import Popen, PIPE
 import util
 
 
-def generate(density='sparse', problem_num=1):
+def generate(num_nodes, num_arcs, density='sparse', problem_num=1):
     """
     Input generator for the netgen C library.
     Example input:
@@ -32,19 +32,26 @@ def generate(density='sparse', problem_num=1):
     c     Capacitated:               100%
     c   Minimum arc capacity:          2
     c   Maximum arc capacity:          5
-    :param density: sparse, medium or dense, determines the total number of arcs in regards to graph density
     :param problem_num: the current problem number, used for generating output file name
     :return:
     """
     seed = int(time.mktime(datetime.utcnow().timetuple()))
-    num_nodes = random.randint(20, 100)
-    num_arcs = _arcs_num_by_density(density, num_nodes)
     args = [seed, problem_num, num_nodes, 1, 1, num_arcs, 1, 1, 1, 0, 0, 0, 100, 10, 100]
 
     netgen_path = os.path.join(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')), 'lib', 'netgen', 'bin', 'netgen.out')
     netgen = Popen(netgen_path, stdin=PIPE, stdout=PIPE)
     out, err = netgen.communicate(" ".join([str(arg) for arg in args]))
     _save_to_file(out, problem_num, density)
+
+
+def _generate_node_arc_num(density, k):
+    narcs = []
+    for i in range(k):
+        nodes = random.randint(20, 100)
+        arcs = _arcs_num_by_density(density, nodes)
+        narcs.append((nodes, arcs))
+
+    return sorted(narcs)
 
 
 def _arcs_num_by_density(density_level, num_nodes):
@@ -69,11 +76,17 @@ def _save_to_file(netgen_output, problem_num, density):
 
 
 if __name__ == '__main__':
-    for i in range(200):
-        generate('sparse', i+1)
+    i = 0
+    for nodes, arcs in _generate_node_arc_num('sparse', 200):
+        generate(nodes, arcs, 'sparse', i+1)
+        i += 1
 
-    for i in range(200):
-        generate('medium', i+1)
+    i = 0
+    for nodes, arcs in _generate_node_arc_num('medium', 200):
+        generate(nodes, arcs, 'medium', i+1)
+        i += 1
 
-    for i in range(200):
-        generate('dense', i+1)
+    i = 0
+    for nodes, arcs in _generate_node_arc_num('dense', 200):
+        generate(nodes, arcs, 'dense', i+1)
+        i += 1
