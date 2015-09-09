@@ -21,7 +21,7 @@ class PushRelabel(object):
         self.all_neighbours = {k: list(v) for k, v in all_neighbours.items()}
 
     def _push(self, n1, n2):
-        residual = self.flow_network.get_residual_network()
+        residual = self.flow_network.residual
         if residual.get_arc_capacity(n1, n2) <= 0 or self.height[n1] != self.height[n2] + 1:
             return False
 
@@ -36,7 +36,7 @@ class PushRelabel(object):
         return True
 
     def _relabel(self, n):
-        residual = self.flow_network.get_residual_network()
+        residual = self.flow_network.residual
         for neighbour in residual.get_node_neighbours(n):
             if self.height[n] > self.height[neighbour]:
                 return False
@@ -48,7 +48,7 @@ class PushRelabel(object):
     def _init_preflow(self):
         excess = {k: 0 for k in self.flow_network.get_nodes()}
         height = {k: 0 for k in self.flow_network.get_nodes()}
-        self.flow_network.reset_flows()
+        self.flow_network.reset()
         s = self.flow_network.source
         height[s] = self.flow_network.total_nodes
         for n in self.flow_network.get_node_neighbours(s):
@@ -70,7 +70,7 @@ class PushRelabel(object):
 
         node = self._get_overflowing_node()
         while node is not None:
-            res = any([self._push(node, neighbour) for neighbour in self.flow_network.get_residual_network().get_node_neighbours(node)])
+            res = any([self._push(node, neighbour) for neighbour in self.flow_network.residual.get_node_neighbours(node)])
             if not res:
                 self._relabel(node)
 

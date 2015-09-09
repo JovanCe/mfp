@@ -6,12 +6,15 @@ import itertools
 
 
 class FlowNetwork(object):
-    def __init__(self, source, sink):
+    def __init__(self, source, sink, residual=False):
         self._source = source
         self._sink = sink
         self._nodes = {}
         self._flows = {}
         self.total_nodes = self.total_arcs = 0
+        self._residual = None
+        if not residual:
+            self._residual = FlowNetwork(self.source, self.sink, True)
 
     def add_arc(self, n1, n2, c):
         """
@@ -23,6 +26,12 @@ class FlowNetwork(object):
         """
         self._nodes[(n1, n2)] = c
         self._flows[(n1, n2)] = 0
+        if self._residual:
+            self._residual.add_arc(n1, n2, c)
+
+    def remove_arc(self, n1, n2):
+        if self._nodes.get((n1, n2), None) is not None:
+            del self._nodes[(n1, n2)]
 
     def set_flow(self, n1, n2, f):
         """
@@ -33,6 +42,16 @@ class FlowNetwork(object):
         :return:
         """
         self._flows[(n1, n2)] = f
+        if self._residual:
+            c = self.nodes[(n1, n2)]
+            if f > 0:
+                self._residual.add_arc(n2, n1, f)
+            else:
+                self._residual.remove_arc(n2, n1)
+            if c-f > 0:
+                self._residual.add_arc(n1, n2, c-f)
+            else:
+                self._residual.remove_arc(n1, n2)
 
     def increase_flow(self, n1, n2, f):
         """
@@ -94,13 +113,17 @@ class FlowNetwork(object):
                 r.add_arc(n1, n2, c-flow)
         return r
 
-    def reset_flows(self):
+    def reset(self):
         self._flows = {k: 0 for k in self._nodes.keys()}
+        if self._residual:
+            self._residual._nodes = {}
+            for (n1, n2), c in self._nodes.items():
+                self._residual.add_arc(n1, n2, c)
 
     def get_current_flows(self):
         return {
             'flows': self.flows,
-            'max_flow': sum([v for (k, v) in self.flows.items() if self.source == k[0]])
+            'max_flow': sum([v for (k, v) in self.flows.items() if self.source == k[0]]),
             }
 
     @property
@@ -124,6 +147,10 @@ class FlowNetwork(object):
     @property
     def sink(self):
         return self._sink
+
+    @property
+    def residual(self):
+        return self._residual
 
 
 class DIMACSGraphFactory(object):
