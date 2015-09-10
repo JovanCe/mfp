@@ -47,7 +47,7 @@ def generate(num_nodes, num_arcs, density='sparse', problem_num=1):
 def _generate_node_arc_num(density, k):
     narcs = []
     for i in range(k):
-        nodes = random.randint(20, 100)
+        nodes = random.randint(50, 200)
         arcs = _arcs_num_by_density(density, nodes)
         narcs.append((nodes, arcs))
 
