@@ -11,6 +11,7 @@ class PushRelabel(object):
         self.height = {}
         self.excess = {}
         self._init_node_neighbour_lists()
+        self.current_neighbhours = {k: 0 for k in flow_network.get_nodes()}
 
     def _init_node_neighbour_lists(self):
         all_neighbours = defaultdict(set)
@@ -22,10 +23,11 @@ class PushRelabel(object):
 
     def _push(self, n1, n2):
         residual = self.flow_network.residual
-        if residual.get_arc_capacity(n1, n2) <= 0 or self.height[n1] != self.height[n2] + 1:
+        cf = residual.get_arc_capacity(n1, n2)
+        if cf <= 0 or self.height[n1] != self.height[n2] + 1:
             return False
 
-        delta_flow = min(self.excess[n1], residual.get_arc_capacity(n1, n2))
+        delta_flow = min(self.excess[n1], cf)
         try:
             self.flow_network.increase_flow(n1, n2, delta_flow)
         except KeyError:
@@ -37,11 +39,18 @@ class PushRelabel(object):
 
     def _relabel(self, n):
         residual = self.flow_network.residual
-        for neighbour in residual.get_node_neighbours(n):
-            if self.height[n] > self.height[neighbour]:
+        neighbours = residual.get_node_neighbours(n)
+        min_neighbour_height = float('inf')
+
+        for neighbour in neighbours:
+            n_height = self.height[neighbour]
+
+            if n_height < min_neighbour_height:
+                min_neighbour_height = n_height
+            if self.height[n] > n_height:
                 return False
 
-        self.height[n] = 1 + min([self.height[neighbour] for neighbour in residual.get_node_neighbours(n)])
+        self.height[n] = 1 + min_neighbour_height
 
         return True
 
@@ -79,7 +88,7 @@ class PushRelabel(object):
         return self.flow_network.get_current_flows()
 
     def _discharge(self, n):
-        i = 0
+        i = self.current_neighbhours[n]
         neighbour_list = self.all_neighbours[n]
         while self.excess[n] > 0:
             try:
@@ -90,6 +99,7 @@ class PushRelabel(object):
             except IndexError:
                 self._relabel(n)
                 i = 0
+        self.current_neighbhours[n] = i
 
     def relabel_to_front(self):
         self._init_preflow()
