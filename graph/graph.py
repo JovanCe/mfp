@@ -3,16 +3,19 @@ __date__ = '23 August 2015'
 __copyright__ = 'Copyright (c) 2015 Seven Bridges Genomics'
 
 import itertools
+from collections import defaultdict
 
 
 class FlowNetwork(object):
-    def __init__(self, source, sink, residual=False):
+    def __init__(self, source, sink, residual=False, node_set=None):
         self._source = source
         self._sink = sink
         self._nodes = {}
         self._flows = {}
         self.total_nodes = self.total_arcs = 0
         self._residual = None
+        self._neighbours = defaultdict(set)
+        self._node_set = node_set
         if not residual:
             self._residual = FlowNetwork(self.source, self.sink, True)
 
@@ -26,12 +29,14 @@ class FlowNetwork(object):
         """
         self._nodes[(n1, n2)] = c
         self._flows[(n1, n2)] = 0
+        self._neighbours[n1].add(n2)
         if self._residual:
             self._residual.add_arc(n1, n2, c)
 
     def remove_arc(self, n1, n2):
         if self._nodes.get((n1, n2), None) is not None:
             del self._nodes[(n1, n2)]
+            self._neighbours[n1].remove(n2)
 
     def set_flow(self, n1, n2, f):
         """
@@ -73,13 +78,6 @@ class FlowNetwork(object):
         """
         self.set_flow(n1, n2, self._flows[(n1, n2)] - f)
 
-    def get_nodes(self):
-        """
-        Return a set of all the nodes in the flow network
-        :return:
-        """
-        return set(itertools.chain.from_iterable(self._nodes.keys()))
-
     def get_arc_capacity(self, n1, n2):
         try:
             return self._nodes[(n1, n2)]
@@ -92,12 +90,7 @@ class FlowNetwork(object):
         :param n: desired node
         :return:
         """
-        neighbours = []
-        for (n1, n2) in self._nodes.keys():
-            if n == n1:
-                neighbours.append(n2)
-
-        return neighbours
+        return list(self._neighbours[n])
 
     def get_residual_network(self):
         """
@@ -117,6 +110,7 @@ class FlowNetwork(object):
         self._flows = {k: 0 for k in self._nodes.keys()}
         if self._residual:
             self._residual._nodes = {}
+            self._residual._neighbours = defaultdict(set)
             for (n1, n2), c in self._nodes.items():
                 self._residual.add_arc(n1, n2, c)
 
@@ -152,6 +146,18 @@ class FlowNetwork(object):
     def residual(self):
         return self._residual
 
+    @property
+    def node_set(self):
+        """
+        Return a set of all the nodes in the flow network
+        :return:
+        """
+        return self._node_set
+
+    @node_set.setter
+    def node_set(self, node_set):
+        self._node_set = node_set
+
 
 class DIMACSGraphFactory(object):
     """
@@ -171,12 +177,17 @@ class DIMACSGraphFactory(object):
             g.total_nodes = total_nodes
 
             # arc descriptors
+            nodes = set()
             for line in f:
                 (n1, n2, c) = [int(i) for i in line.split(' ')[1:]]
                 # ignore incoming edges to source and outgoing from sink
-                if n1 == t or n2 == s:
+                if n1 == t or n2 == s or n2 == 0:
                     total_arcs -= 1
                     continue
                 g.add_arc(n1, n2, c)
+                nodes.add(n1)
+                nodes.add(n2)
             g.total_arcs = total_arcs
+            g.node_set = nodes
+            g.residual.node_set = nodes
         return g

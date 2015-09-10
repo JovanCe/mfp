@@ -13,7 +13,7 @@ def bfs(graph, source, target):
     :param target:
     :return:
     """
-    nodes = graph.get_nodes()
+    nodes = graph.node_set
     queue = Queue(len(nodes))
     distances = {}
     parents = {}
@@ -53,7 +53,7 @@ def bfs_min_capacity(flow_network, source, target, min_capacity):
     :param target:
     :return:
     """
-    nodes = flow_network.get_nodes()
+    nodes = flow_network.node_set
     queue = Queue(len(nodes))
     distances = {}
     parents = {}

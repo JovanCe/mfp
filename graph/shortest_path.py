@@ -13,7 +13,7 @@ def dijkstra(graph, source, target):
     """
     dist = {}
     prev = {}
-    nodes = graph.get_nodes()
+    nodes = graph.node_set
     q = []
 
     for node in nodes:

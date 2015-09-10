@@ -3,6 +3,7 @@ __date__ = '30 August 2015'
 __copyright__ = 'Copyright (c) 2015 Seven Bridges Genomics'
 
 from collections import defaultdict
+import time
 
 
 class PushRelabel(object):
@@ -11,7 +12,7 @@ class PushRelabel(object):
         self.height = {}
         self.excess = {}
         self._init_node_neighbour_lists()
-        self.current_neighbhours = {k: 0 for k in flow_network.get_nodes()}
+        self.current_neighbhours = {k: 0 for k in flow_network.node_set}
 
     def _init_node_neighbour_lists(self):
         all_neighbours = defaultdict(set)
@@ -55,8 +56,8 @@ class PushRelabel(object):
         return True
 
     def _init_preflow(self):
-        excess = {k: 0 for k in self.flow_network.get_nodes()}
-        height = {k: 0 for k in self.flow_network.get_nodes()}
+        excess = {k: 0 for k in self.flow_network.node_set}
+        height = {k: 0 for k in self.flow_network.node_set}
         self.flow_network.reset()
         s = self.flow_network.source
         height[s] = self.flow_network.total_nodes
@@ -102,9 +103,10 @@ class PushRelabel(object):
         self.current_neighbhours[n] = i
 
     def relabel_to_front(self):
+
         self._init_preflow()
 
-        node_list = list(self.flow_network.get_nodes() - {self.flow_network.source, self.flow_network.sink})
+        node_list = list(self.flow_network.node_set - {self.flow_network.source, self.flow_network.sink})
         i = 0
         while True:
             try:
