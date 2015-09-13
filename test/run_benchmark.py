@@ -3,6 +3,7 @@ __date__ = '08 September 2015'
 __copyright__ = 'Copyright (c) 2015 Seven Bridges Genomics'
 
 import time
+import json
 import maxflow
 import util
 from graph.graph import DIMACSGraphFactory
@@ -17,11 +18,11 @@ def measure_execution_time(func, *args):
 
 def _run_maxflow(maxflow_func, data_file):
     flow_network = DIMACSGraphFactory.create(util.get_data_file(data_file))
-    maxflow_func(flow_network)
+    return measure_execution_time(maxflow_func, flow_network)
 
 
 def _run_by_density(density, maxflow_func):
-    results = [measure_execution_time(_run_maxflow, maxflow_func, '%s_%d.txt' % (density, i+1)) for i in range(200)]
+    results = [_run_maxflow(maxflow_func, '%s_%d.txt' % (density, i+1)) for i in range(200)]
     return results
 
 
@@ -37,5 +38,14 @@ def _run_batch(density):
 
 if __name__ == '__main__':
     sparse_results = _run_batch('sparse')
+    with open(util.get_out_file('sparse.txt'), 'w') as f:
+        json.dump(sparse_results, f)
+
     medium_results = _run_batch('medium')
+    with open(util.get_out_file('medium.txt'), 'w') as f:
+        json.dump(medium_results, f)
+
     dense_results = _run_batch('dense')
+    with open(util.get_out_file('dense.txt'), 'w') as f:
+        json.dump(dense_results, f)
+
