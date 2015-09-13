@@ -2,7 +2,6 @@ __author__ = 'Jovan Cejovic <jovan.cejovic@sbgenomics.com>'
 __date__ = '23 August 2015'
 __copyright__ = 'Copyright (c) 2015 Seven Bridges Genomics'
 
-import itertools
 from collections import defaultdict
 
 
@@ -91,20 +90,6 @@ class FlowNetwork(object):
         :return:
         """
         return list(self._neighbours[n])
-
-    def get_residual_network(self):
-        """
-        Constructs and returns a residual network corresponding to the current flows of the flow network
-        :return:
-        """
-        r = FlowNetwork(self._source, self._sink)
-        for (n1, n2), c in self._nodes.items():
-            flow = self._flows[(n1, n2)]
-            if flow > 0:
-                r.add_arc(n2, n1, flow)
-            if c-flow > 0:
-                r.add_arc(n1, n2, c-flow)
-        return r
 
     def reset(self):
         self._flows = {k: 0 for k in self._nodes.keys()}
