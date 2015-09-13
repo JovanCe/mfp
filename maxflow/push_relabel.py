@@ -3,7 +3,6 @@ __date__ = '30 August 2015'
 __copyright__ = 'Copyright (c) 2015 Seven Bridges Genomics'
 
 from collections import defaultdict
-import time
 
 
 class PushRelabel(object):
@@ -25,6 +24,7 @@ class PushRelabel(object):
     def _push(self, n1, n2):
         residual = self.flow_network.residual
         cf = residual.get_arc_capacity(n1, n2)
+
         if cf <= 0 or self.height[n1] != self.height[n2] + 1:
             return False
 
@@ -80,7 +80,12 @@ class PushRelabel(object):
 
         node = self._get_overflowing_node()
         while node is not None:
-            res = any([self._push(node, neighbour) for neighbour in self.flow_network.residual.get_node_neighbours(node)])
+            res = False
+            for neighbour in self.flow_network.residual.get_node_neighbours(node):
+                res = self._push(node, neighbour)
+                if res:
+                    break
+
             if not res:
                 self._relabel(node)
 
@@ -95,15 +100,13 @@ class PushRelabel(object):
             try:
                 neighbour = neighbour_list[i]
                 success = self._push(n, neighbour)
-                if not success:
-                    i += 1
+                i += 1
             except IndexError:
                 self._relabel(n)
                 i = 0
         self.current_neighbhours[n] = i
 
     def relabel_to_front(self):
-
         self._init_preflow()
 
         node_list = list(self.flow_network.node_set - {self.flow_network.source, self.flow_network.sink})
