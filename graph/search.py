@@ -26,7 +26,7 @@ def bfs(graph, source, target):
     distances[source] = 0
     queue.append(source)
     while len(queue):
-        u = queue.pop()
+        u = queue.popleft()
         if u == target:
             path = []
             while parents[u] != -1:
@@ -66,7 +66,7 @@ def bfs_min_capacity(flow_network, source, target, min_capacity):
     distances[source] = 0
     queue.append(source)
     while len(queue):
-        u = queue.pop()
+        u = queue.popleft()
         if u == target:
             path = []
             while parents[u] != -1:
