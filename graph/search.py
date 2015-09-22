@@ -2,7 +2,7 @@ __author__ = 'Jovan Cejovic <jovan.cejovic@sbgenomics.com>'
 __date__ = '23 August 2015'
 __copyright__ = 'Copyright (c) 2015 Seven Bridges Genomics'
 
-from Queue import Queue
+from collections import deque
 
 
 def bfs(graph, source, target):
@@ -14,7 +14,7 @@ def bfs(graph, source, target):
     :return:
     """
     nodes = graph.node_set
-    queue = Queue(len(nodes))
+    queue = deque(maxlen=len(nodes))
     distances = {}
     parents = {}
     for n in nodes:
@@ -24,9 +24,9 @@ def bfs(graph, source, target):
         parents[n] = -1
 
     distances[source] = 0
-    queue.put(source)
-    while not queue.empty():
-        u = queue.get()
+    queue.append(source)
+    while len(queue):
+        u = queue.pop()
         if u == target:
             path = []
             while parents[u] != -1:
@@ -40,7 +40,7 @@ def bfs(graph, source, target):
             if distances[n] == -1:
                 distances[n] = distances[u] + 1
                 parents[n] = u
-                queue.put(n)
+                queue.append(n)
 
     return []
 
@@ -54,7 +54,7 @@ def bfs_min_capacity(flow_network, source, target, min_capacity):
     :return:
     """
     nodes = flow_network.node_set
-    queue = Queue(len(nodes))
+    queue = deque(maxlen=len(nodes))
     distances = {}
     parents = {}
     for n in nodes:
@@ -64,9 +64,9 @@ def bfs_min_capacity(flow_network, source, target, min_capacity):
         parents[n] = -1
 
     distances[source] = 0
-    queue.put(source)
-    while not queue.empty():
-        u = queue.get()
+    queue.append(source)
+    while len(queue):
+        u = queue.pop()
         if u == target:
             path = []
             while parents[u] != -1:
@@ -80,7 +80,7 @@ def bfs_min_capacity(flow_network, source, target, min_capacity):
             if distances[n] == -1 and flow_network.get_arc_capacity(u, n) >= min_capacity:
                 distances[n] = distances[u] + 1
                 parents[n] = u
-                queue.put(n)
+                queue.append(n)
 
     return []
 
