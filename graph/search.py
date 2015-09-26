@@ -84,7 +84,44 @@ def bfs_min_capacity(flow_network, source, target, min_capacity):
 
     return []
 
-def dfs(graph, node):
-    pass
+
+def dfs(graph, source, target):
+    """
+    Finds a path from source to target using depth-first search
+    :param graph:
+    :param source:
+    :param target:
+    :return:
+    """
+    nodes = graph.node_set
+    queue = []
+    distances = {}
+    parents = {}
+    for n in nodes:
+        # infinite distance
+        distances[n] = -1
+        # no parent
+        parents[n] = -1
+
+    distances[source] = 0
+    queue.append(source)
+    while len(queue):
+        u = queue.pop()
+        if u == target:
+            path = []
+            while parents[u] != -1:
+                path.insert(0, u)
+                u = parents[u]
+            # check if a path exists and add the source node for complete path
+            if len(path):
+                path.insert(0, u)
+            return path
+        for n in graph.get_node_neighbours(u):
+            if distances[n] == -1:
+                distances[n] = distances[u] + 1
+                parents[n] = u
+                queue.append(n)
+
+    return []
 
 

@@ -4,7 +4,7 @@ __copyright__ = 'Copyright (c) 2015 Seven Bridges Genomics'
 
 import os
 
-DATA_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'data', 'big')
+DATA_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'data')
 OUT_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'out')
 
 
