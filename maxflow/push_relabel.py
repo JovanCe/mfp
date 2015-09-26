@@ -46,7 +46,7 @@ class PushRelabel(object):
         for neighbour in neighbours:
             n_height = self.height[neighbour]
 
-            if n_height < min_neighbour_height:
+            if n_height < min_neighbour_height and residual.get_arc_capacity(n, neighbour) > 0:
                 min_neighbour_height = n_height
             if self.height[n] > n_height:
                 return False
