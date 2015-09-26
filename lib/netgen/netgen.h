@@ -73,8 +73,8 @@ long random();    			/* generate random integer in interval */
  *** through arrays in memory.
  ***/
 
-#define MAXNODES 10000	    		/* maximum problem sizes */
-#define MAXARCS  40000
+#define MAXNODES 5000  		/* maximum problem sizes */
+#define MAXARCS  30000000
 
 #define FROM arrays_	    		/* aliases for network storage */
 #define TO   arraye_
