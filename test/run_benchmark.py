@@ -29,7 +29,9 @@ def _run_by_density(density, maxflow_func):
 def _run_batch(density):
     results = {
         'ek': _run_by_density(density, maxflow.edmonds_karp),
+        'df': _run_by_density(density, maxflow.edmonds_karp_dfs),
         'ff': _run_by_density(density, maxflow.ford_fulkerson),
+        'pq': _run_by_density(density, maxflow.ford_fulkerson_pq),
         'cs': _run_by_density(density, maxflow.capacity_scaling),
         'pr': _run_by_density(density, maxflow.generic_push_relabel),
         'rf': _run_by_density(density, maxflow.relabel_to_front)
