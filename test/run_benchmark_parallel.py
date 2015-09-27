@@ -60,9 +60,19 @@ def _execute(density):
     pool.close()
     pool.join()
 
-    results = {}
+    results = {
+        'ff': [],
+        'pq': [],
+        'ek': [],
+        'df': [],
+        'cs': [],
+        'pr': [],
+        'rf': []
+    }
     for i in range(num_process):
-        results.update(json.load(open(util.get_out_file('worker', '%s_%d.txt' % (density, i+1)))))
+        res = json.load(open(util.get_out_file('worker', '%s_%d.txt' % (density, i+1))))
+        for k, v in res.items():
+            results[k].extend(v)
     with open(util.get_out_file('%s.txt' % density), 'w') as f:
         json.dump(results, f)
 
